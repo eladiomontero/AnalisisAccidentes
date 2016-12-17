@@ -6,11 +6,25 @@ library(caret)
 summary(accidentesData)
 accidentesData$ilesos = as.numeric(accidentesData$claseDeAccidente) - 1
 accidentesData$ano = factor(accidentesData$ano)
+accidentesData[accidentesData == "Desconocido"] = NA
+accidentesData[accidentesData == "Desconocida"] = NA
+accidentesData[accidentesData == "Otro o desconocido"] = NA
 
-
+sapply(accidentesData, function(x) length(unique(x)))
 plot(accidentesData$claseDeAccidente)
 qplot(claseDeAccidente, hora, data = accidentesData, geom = c("boxplot"), fill = claseDeAccidente)
 qplot(hora, fill = claseDeAccidente, data = accidentesData)
+missmap(accidentesData, main = "Missing values")
+
+trainIndex <- createDataPartition(accidentesData$claseDeAccidente, p = .7, 
+                                  list = FALSE, 
+                                  times = 1)
+training = accidentesData[trainIndex,]
+test = accidentesData[-trainIndex,]
+
+#model = lm(ilesos ~ ., data = training)
+
+model = glm(ilesos ~., family = binomial(link = "logit"), data = training)
 
 
 
